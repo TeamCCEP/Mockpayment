@@ -2,59 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mock Payment Gateway</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-        .warning { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; margin-bottom: 20px; color: #856404; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 500px; margin: auto; background-color: #f4f4f4; }
+        .container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .warning { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; margin-bottom: 20px; color: #856404; font-size: 0.9em; border-radius: 4px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
-        input { width: 100%; padding: 8px; box-sizing: border-box; }
-        button { background: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .row { display: flex; gap: 10px; }
+        button { width: 100%; background: #0066cc; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #0052a3; }
     </style>
 </head>
 <body>
 
+<div class="container">
     <div class="warning">
-        <strong>MOCK PAGE ONLY:</strong> Do not enter real credit card information. This page is for testing purposes only.
+        <strong>MOCK PAGE ONLY:</strong> This is a simulation for testing purposes. Do not enter real credit card details.
     </div>
 
-    <h2>Secure Payment</h2>
+    <h2>Checkout</h2>
+    
     <div class="form-group">
-        <label>Webhook URL (Notification Target):</label>
+        <label>Notification Webhook URL:</label>
         <input type="url" id="webhookUrl" placeholder="https://webhook.site/...">
     </div>
+
+    <hr>
+
     <div class="form-group">
-        <label>Cardholder Name:</label>
-        <input type="text" id="name">
+        <label>Cardholder Name</label>
+        <input type="text" id="name" placeholder="John Doe">
     </div>
+
     <div class="form-group">
-        <label>Card Number:</label>
+        <label>Card Number</label>
         <input type="text" id="card" placeholder="0000 0000 0000 0000">
     </div>
+
+    <div class="row">
+        <div class="form-group" style="flex: 2;">
+            <label>Expiry (MM/YY)</label>
+            <input type="text" id="expiry" placeholder="MM/YY">
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>CVV</label>
+            <input type="text" id="cvv" placeholder="123">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Postcode</label>
+        <input type="text" id="postcode" placeholder="SW1A 1AA">
+    </div>
+
     <button onclick="processPayment()">Pay Now</button>
+</div>
 
-    <script>
-        async function processPayment() {
-            const url = document.getElementById('webhookUrl').value;
-            if (!url) {
-                alert("Please enter a valid Webhook URL.");
-                return;
-            }
-
-            const data = { "paymentstatus": "Approved" };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                alert("Payment processed! Webhook notified with status: " + data.paymentstatus);
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Failed to send webhook notification.");
-            }
+<script>
+    async function processPayment() {
+        const url = document.getElementById('webhookUrl').value;
+        if (!url) {
+            alert("Please enter a valid Webhook URL.");
+            return;
         }
-    </script>
+
+        const data = { "paymentstatus": "Approved" };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': '*/*'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                alert("Payment simulated successfully! Webhook notified.");
+            } else {
+                alert("Webhook returned an error status: " + response.status);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("CORS or Network Error. Please check the browser console for specific details.");
+        }
+    }
+</script>
 </body>
 </html>
