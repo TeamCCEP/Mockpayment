@@ -63,35 +63,32 @@
 
 <script>
     async function processPayment() {
-        const url = document.getElementById('webhookUrl').value;
-        if (!url) {
-            alert("Please enter a valid Webhook URL.");
-            return;
-        }
-
-        const data = { "paymentstatus": "Approved" };
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': '*/*'
-                },
-                body: JSON.stringify(data)
-            });
-            
-            if (response.ok) {
-                alert("Payment simulated successfully! Webhook notified.");
-            } else {
-                alert("Webhook returned an error status: " + response.status);
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("CORS or Network Error. Please check the browser console for specific details.");
-        }
+    const url = document.getElementById('webhookUrl').value;
+    if (!url) {
+        alert("Please enter a valid Webhook URL.");
+        return;
     }
+
+    const data = { "paymentstatus": "Approved" };
+
+    try {
+        // We use 'no-cors' to bypass the browser's preflight requirement.
+        // This sends the request, but the response will be "opaque" (you can't read it).
+        await fetch(url, {
+            method: 'POST',
+            mode: 'no-cors', 
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        alert("Request sent! (Note: In 'no-cors' mode, we cannot verify if the server received it, but the request was dispatched.)");
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Network Error. Check the console.");
+    }
+}
 </script>
 </body>
 </html>
