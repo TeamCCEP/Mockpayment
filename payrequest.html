@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mock Payment Gateway</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        .warning { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; margin-bottom: 20px; color: #856404; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { background: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="warning">
+        <strong>MOCK PAGE ONLY:</strong> Do not enter real credit card information. This page is for testing purposes only.
+    </div>
+
+    <h2>Secure Payment</h2>
+    <div class="form-group">
+        <label>Webhook URL (Notification Target):</label>
+        <input type="url" id="webhookUrl" placeholder="https://webhook.site/...">
+    </div>
+    <div class="form-group">
+        <label>Cardholder Name:</label>
+        <input type="text" id="name">
+    </div>
+    <div class="form-group">
+        <label>Card Number:</label>
+        <input type="text" id="card" placeholder="0000 0000 0000 0000">
+    </div>
+    <button onclick="processPayment()">Pay Now</button>
+
+    <script>
+        async function processPayment() {
+            const url = document.getElementById('webhookUrl').value;
+            if (!url) {
+                alert("Please enter a valid Webhook URL.");
+                return;
+            }
+
+            const data = { "paymentstatus": "Approved" };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                alert("Payment processed! Webhook notified with status: " + data.paymentstatus);
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to send webhook notification.");
+            }
+        }
+    </script>
+</body>
+</html>
