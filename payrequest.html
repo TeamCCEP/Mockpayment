@@ -14,16 +14,18 @@
         .row { display: flex; gap: 10px; }
         button { width: 100%; background: #0066cc; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
         button:hover { background: #0052a3; }
+        #orderDisplay { font-weight: bold; color: #0066cc; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="warning">
-        <strong>MOCK PAGE ONLY:</strong> This is a simulation for testing purposes. Do not enter real credit card details.
+        <strong>MOCK PAGE ONLY:</strong> Simulation for testing. Do not enter real card details.
     </div>
 
     <h2>Checkout</h2>
+    <p>Order ID: <span id="orderDisplay">None</span></p>
     
     <div class="form-group">
         <label>Notification Webhook URL:</label>
@@ -62,33 +64,41 @@
 </div>
 
 <script>
+    // 1. Extract orderid from URL on load
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('orderid') || "N/A";
+    document.getElementById('orderDisplay').innerText = orderId;
+
     async function processPayment() {
-    const url = document.getElementById('webhookUrl').value;
-    if (!url) {
-        alert("Please enter a valid Webhook URL.");
-        return;
-    }
+        const url = document.getElementById('webhookUrl').value;
+        if (!url) {
+            alert("Please enter a valid Webhook URL.");
+            return;
+        }
 
-    const data = { "paymentstatus": "Approved" };
+        // 2. Add orderid to the payload
+        const data = { 
+            "paymentstatus": "Approved",
+            "orderid": orderId 
+        };
 
-    try {
-        // We use 'no-cors' to bypass the browser's preflight requirement.
-        // This sends the request, but the response will be "opaque" (you can't read it).
-        await fetch(url, {
-            method: 'POST',
-            mode: 'no-cors', 
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        
-        alert("Request sent! (Note: In 'no-cors' mode, we cannot verify if the server received it, but the request was dispatched.)");
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Network Error. Check the console.");
+        try {
+            // 3. Using no-cors to ensure the request reaches webhook.site
+            await fetch(url, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            alert("Payment Success for Order #" + orderId);
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Network Error. Check the console.");
+        }
     }
-}
 </script>
 </body>
 </html>
