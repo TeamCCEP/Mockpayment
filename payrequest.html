@@ -7,6 +7,7 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 500px; margin: auto; background-color: #f4f4f4; }
         .container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .logo { width: 100%; max-width: 200px; display: block; margin: 0 auto 20px auto; }
         .warning { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; margin-bottom: 20px; color: #856404; font-size: 0.9em; border-radius: 4px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; }
@@ -20,6 +21,8 @@
 <body>
 
 <div class="container">
+    <img src="/Images/Dominos-Pizza.png" alt="Dominos Logo" class="logo">
+    
     <div class="warning">
         <strong>MOCK PAGE ONLY:</strong> Simulation for testing. Do not enter real card details.
     </div>
@@ -27,7 +30,7 @@
     <h2>Checkout</h2>
     <p>Order ID: <span id="orderDisplay">None</span></p>
     
-    <div class="form-group">
+    <div class="form-group" id="webhookContainer">
         <label>Notification Webhook URL:</label>
         <input type="url" id="webhookUrl" placeholder="https://webhook.site/...">
     </div>
@@ -64,36 +67,51 @@
 </div>
 
 <script>
-    // 1. Extract orderid from URL on load
     const urlParams = new URLSearchParams(window.location.search);
+    
+    // Extract parameters
     const orderId = urlParams.get('orderid') || "N/A";
+    const mobile = urlParams.get('mobile') || "";
+    const paymentAmount = urlParams.get('paymentamount') || "0.00";
+    const wa = urlParams.get('wa') === 'true';
+    
+    // Set UI
     document.getElementById('orderDisplay').innerText = orderId;
+    
+    // Handle 'wa' mode: hide webhook box
+    if (wa) {
+        document.getElementById('webhookContainer').style.display = 'none';
+    }
 
     async function processPayment() {
-        const url = document.getElementById('webhookUrl').value;
+        // If wa is true, we assume a default or you could pass it as a hidden URL param
+        // Here we default to the webhook input value, or a specific endpoint if wa is true
+        const url = wa ? "https://webhook.site/a83d1116-1876-4650-84e1-caf919292592" : document.getElementById('webhookUrl').value;
+        
         if (!url) {
             alert("Please enter a valid Webhook URL.");
             return;
         }
 
-        // 2. Add orderid to the payload
-        const data = { 
+        // Determine payload based on 'wa' mode
+        const data = wa ? { 
+            "paymentstatus": "accepted",
+            "paymentamount": paymentAmount,
+            "mobile": mobile
+        } : { 
             "paymentstatus": "Approved",
             "orderid": orderId 
         };
 
         try {
-            // 3. Using no-cors to ensure the request reaches webhook.site
             await fetch(url, {
                 method: 'POST',
                 mode: 'no-cors', 
-                headers: { 
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
             
-            alert("Payment Success for Order #" + orderId);
+            alert("Payment processed successfully!");
         } catch (error) {
             console.error("Error:", error);
             alert("Network Error. Check the console.");
