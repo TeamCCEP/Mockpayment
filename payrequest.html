@@ -69,23 +69,18 @@
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     
-    // Extract parameters
     const orderId = urlParams.get('orderid') || "N/A";
     const mobile = urlParams.get('mobile') || "";
     const paymentAmount = urlParams.get('paymentamount') || "0.00";
     const wa = urlParams.get('wa') === 'true';
     
-    // Set UI
     document.getElementById('orderDisplay').innerText = orderId;
     
-    // Handle 'wa' mode: hide webhook box
     if (wa) {
         document.getElementById('webhookContainer').style.display = 'none';
     }
 
     async function processPayment() {
-        // If wa is true, we assume a default or you could pass it as a hidden URL param
-        // Here we default to the webhook input value, or a specific endpoint if wa is true
         const url = wa ? "https://webhook.site/a83d1116-1876-4650-84e1-caf919292592" : document.getElementById('webhookUrl').value;
         
         if (!url) {
@@ -93,11 +88,11 @@
             return;
         }
 
-        // Determine payload based on 'wa' mode
         const data = wa ? { 
             "paymentstatus": "accepted",
             "paymentamount": paymentAmount,
-            "mobile": mobile
+            "mobile": mobile,
+            "orderid": orderId
         } : { 
             "paymentstatus": "Approved",
             "orderid": orderId 
